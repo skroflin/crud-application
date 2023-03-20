@@ -15,17 +15,17 @@ export async function insertEmployee(employeeName: string, salary: number, depar
         await client.query('BEGIN')
 
         const departmentNo = await client.query('SELECT "departmentNo" FROM public.department WHERE "departmentName" = $1', [departmentName])
-        console.log(departmentNo.rows[0])
 
-        const ad = await client.query(
+        const insertedEmployee = await client.query(
             'INSERT INTO public.employee ("employeeName", "salary", "departmentNo", "lastModifyDate") VALUES ($1, $2, $3, $4)',
-            [employeeName, salary, departmentName, lastModifyDate]
+            [employeeName, salary, departmentNo.rows[0].departmentNo, lastModifyDate]
         )
+        
+        //if (departmentNo.row.length == 0) throw new Error(`Department with name ${departmentName} does not exist)`)
 
         await client.query('COMMIT')
     }catch(e){
         await client.query('ROLLBACK')
-        throw e
     }finally{
         client.release()
     }
