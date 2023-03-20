@@ -15,9 +15,9 @@ router.get("/", async function(req, res, next) {
 router.post("/", async function (req, res, next) {
     
     try{
-        const{ employeeName, salary, departmentNo, lastModifyDate } = req.body
-        console.log(employeeName, salary, departmentNo, lastModifyDate)
-        res.json(await insertEmployee(employeeName, salary, departmentNo, lastModifyDate))
+        const{ employeeName, salary, departmentName, lastModifyDate } = req.body
+        //console.log(employeeName, salary, departmentName, lastModifyDate)
+        res.json(await insertEmployee(employeeName, salary, departmentName, lastModifyDate))
     }catch(e){
         next(e)
     }
