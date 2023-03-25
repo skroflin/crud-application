@@ -27,6 +27,24 @@ export async function insertDepartments(departmentName: string, departmentLocati
     }
 }
 
+export async function updateDepartments(departmentLocation: string, departmentName: string, departmentNo: number) {
+
+    const client = await dbClient()
+    try{
+        await client.query('BEGIN')
+
+        await client.query(
+            'UPDATE public.department SET "departmentLocation" = $1, "departmentName" = $2 WHERE "departmentNo" = $3 RETURNING *', [departmentLocation, departmentName, departmentNo]
+        )
+
+        await client.query('COMMIT')
+    }catch(e){
+        await client.query('ROLLBACK')
+    }finally{
+        client.release()
+    }
+}
+
 function query(arg0: string, arg1: any[]) {
     throw new Error('Function not implemented.')
 }

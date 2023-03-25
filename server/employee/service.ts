@@ -3,22 +3,22 @@ import { dbClient } from '../database'
 export async function getAllEmployees() {
 
     const client = await dbClient()
-    const employees = await client.query('SELECT * FROM public.employee')
+    const employees = await client.query('SELECT * FROM public.employee ORDER BY "employeeNo" ASC')
     return employees.rows
 }
 
-export async function insertEmployee(employeeName: string, salary: number, departmentName: string, lastModifyDate?:Date) {
+export async function insertEmployees(employeeName: string, salary: number, departmentNo: number, lastModifyDate:Date) {
 
     const client = await dbClient()
     
     try{
         await client.query('BEGIN')
 
-        const departmentNo = await client.query('SELECT "departmentNo" FROM public.department WHERE "departmentName" = $1', [departmentName])
+        //const departmentNo = await client.query('SELECT "departmentNo" FROM public.department WHERE "departmentName" = $1 WHERE "departmentLocation"', [departmentName, departmentLocation])
 
         const insertedEmployee = await client.query(
             'INSERT INTO public.employee ("employeeName", "salary", "departmentNo", "lastModifyDate") VALUES ($1, $2, $3, $4)',
-            [employeeName, salary, departmentNo.rows[0].departmentNo, lastModifyDate]
+            [employeeName, salary, departmentNo, lastModifyDate]
         )
         
         //if (departmentNo.row.length == 0) throw new Error(`Department with name ${departmentName} does not exist)`)
@@ -30,6 +30,26 @@ export async function insertEmployee(employeeName: string, salary: number, depar
         client.release()
     }
     
+}
+
+export async function updateEmployee(salary: number, departmentNo: number, lastModifyDate: Date, employeeName: string){
+    const client = await dbClient()
+
+    try{
+        await client.query('BEGIN')
+
+        //const employeeNo = await client.query('SELECT "employeeNo" FROM public.employee WHERE "employeeNo" = $1', [employeeNo])
+
+        await client.query(
+            'UPDATE public.employee SET "salary" = $1, "departmentNo" = $2, "lastModifyDate" = $3 WHERE "employeeName" = $4 RETURNING *', [salary, departmentNo, lastModifyDate, employeeName]
+        )
+
+        await client.query('COMMIT')
+    }catch(e){
+        await client.query('ROLLBACK')
+    }finally{
+        client.release()
+    }
 }
 
 function query(_arg0: string, _arg1: any[]) {
