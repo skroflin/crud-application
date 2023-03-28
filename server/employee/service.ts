@@ -52,6 +52,24 @@ export async function updateEmployee(salary: number, departmentNo: number, lastM
     }
 }
 
+export async function deleteEmployees(employeeName: string){
+    const client = await dbClient()
+
+    try{
+        await client.query('BEGIN')
+
+        await client.query(
+            'DELETE FROM public.employee WHERE "employeeName" = 1$ RETURNING *', [employeeName]
+        )
+
+        await client.query('COMMIT')
+    }catch(e){
+        await client.query('ROLLBACK')
+    }finally{
+        client.release()
+    }
+}
+
 function query(_arg0: string, _arg1: any[]) {
     throw new Error('Function not implemented.')
 }
