@@ -59,12 +59,13 @@ export async function deleteEmployees(employeeName: string){
         await client.query('BEGIN')
 
         await client.query(
-            'DELETE FROM public.employee WHERE "employeeName" = 1$ RETURNING *', [employeeName]
+            'DELETE FROM public.employee WHERE "employeeName" = $1 RETURNING *', [employeeName]
         )
 
         await client.query('COMMIT')
     }catch(e){
         await client.query('ROLLBACK')
+        console.log(e)
     }finally{
         client.release()
     }
