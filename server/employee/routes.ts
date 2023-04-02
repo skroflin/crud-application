@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAllEmployees, insertEmployees, updateEmployee, deleteEmployees } from "./service";
+import { getAllEmployees, insertEmployees, updateEmployee, deleteEmployee } from "./service";
 
 const router = Router()
 
@@ -40,7 +40,7 @@ router.delete("/", async function (req, res, next){
     try{
         const{ employeeName } = req.body
         console.log(employeeName)
-        await deleteEmployees(employeeName)
+        await deleteEmployee(employeeName)
         res.sendStatus(200)
     }catch(e){
         next(e)

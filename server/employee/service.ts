@@ -52,7 +52,7 @@ export async function updateEmployee(salary: number, departmentNo: number, lastM
     }
 }
 
-export async function deleteEmployees(employeeName: string){
+export async function deleteEmployee(employeeName: string){
     const client = await dbClient()
 
     try{
