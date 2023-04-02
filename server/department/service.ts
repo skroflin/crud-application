@@ -27,7 +27,7 @@ export async function insertDepartments(departmentName: string, departmentLocati
     }
 }
 
-export async function updateDepartments(departmentLocation: string, departmentName: string, departmentNo: number) {
+export async function updateDepartments(departmentLocation: string, departmentName: string, departmentNo) {
 
     const client = await dbClient()
     try{
@@ -40,6 +40,26 @@ export async function updateDepartments(departmentLocation: string, departmentNa
         await client.query('COMMIT')
     }catch(e){
         await client.query('ROLLBACK')
+        console.log(e)
+    }finally{
+        client.release()
+    }
+}
+
+export async function deleteDepartment(departmentNo: number){
+
+    const client = await dbClient()
+    try{
+        await client.query('BEGIN')
+
+        await client.query(
+            'DELETE FROM public.department WHERE "departmentNo" = $1 RETURNING *', [departmentNo]
+        )
+
+        await client.query('COMMIT')
+    }catch(e){
+        await client.query('ROLLBACK')
+        console.log(e)
     }finally{
         client.release()
     }
