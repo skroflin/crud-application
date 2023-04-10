@@ -13,6 +13,12 @@ export async function insertDepartments(departmentName: string, departmentLocati
     try{
         await client.query('BEGIN')
 
+        const departments = await client.query(
+            'SELECT * FROM public.department WHERE "departmentName" = $1 AND "departmentLocation" = $2', [departmentName, departmentLocation]
+        )
+        //console.log(departments.rows.length)
+        if(departments.rows.length !== 0) throw new Error(`Department with name ${departmentName} and location ${departmentLocation} exists`)
+
         const ad = await client.query(
             'INSERT INTO public.department ("departmentName", "departmentLocation") VALUES ($1, $2)',
             [departmentName, departmentLocation]
