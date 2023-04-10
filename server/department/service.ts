@@ -46,14 +46,14 @@ export async function updateDepartments(departmentLocation: string, departmentNa
     }
 }
 
-export async function deleteDepartment(departmentNo: number){
+export async function deleteDepartment(departmentName: string, departmentLocation: string){
 
     const client = await dbClient()
     try{
         await client.query('BEGIN')
 
         await client.query(
-            'DELETE FROM public.department WHERE "departmentNo" = $1 RETURNING *', [departmentNo]
+            'DELETE FROM public.department WHERE "departmentName" = $1 AND "departmentLocation" = $2 RETURNING *', [departmentName, departmentLocation]
         )
 
         await client.query('COMMIT')

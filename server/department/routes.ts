@@ -39,8 +39,8 @@ router.put("/", async function (req, res, next) {
 router.delete("/", async function (req, res, next) {
 
     try{
-        const { departmentNo } = req.body
-        await deleteDepartment(departmentNo)
+        const { departmentName, departmentLocation } = req.body
+        await deleteDepartment(departmentName, departmentLocation)
         res.sendStatus(200)
     }catch(e){
         next(e)
