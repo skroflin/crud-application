@@ -3,15 +3,19 @@ import { dbClient } from '../database'
 export async function getAllEmployees() {
 
     const client = await dbClient()
-    const employees = await client.query('SELECT * FROM public.employee ORDER BY "employeeNo" ASC')
+    const employees = await client.query(`
+        SELECT e."employeeName", e."salary", d."departmentName", d."departmentLocation", e."lastModifyDate"
+        FROM public.department d
+        INNER JOIN public.employee e ON d."departmentNo" = e."departmentNo";`)
+        
     return employees.rows
 }
 
-export async function insertEmployees(employeeName: string, salary: number, departmentNo: number, lastModifyDate:Date) {
+export async function insertEmployees(employeeName: string, salary: number, departmentNo: number, lastModifyDate: Date) {
 
     const client = await dbClient()
-    
-    try{
+
+    try {
         await client.query('BEGIN')
 
         //const departmentNo = await client.query('SELECT "departmentNo" FROM public.department WHERE "departmentName" = $1 WHERE "departmentLocation"', [departmentName, departmentLocation])
@@ -20,22 +24,22 @@ export async function insertEmployees(employeeName: string, salary: number, depa
             'INSERT INTO public.employee ("employeeName", "salary", "departmentNo", "lastModifyDate") VALUES ($1, $2, $3, $4)',
             [employeeName, salary, departmentNo, lastModifyDate]
         )
-        
+
         //if (departmentNo.row.length == 0) throw new Error(`Department with name ${departmentName} does not exist)`)
 
         await client.query('COMMIT')
-    }catch(e){
+    } catch (e) {
         await client.query('ROLLBACK')
-    }finally{
+    } finally {
         client.release()
     }
-    
+
 }
 
-export async function updateEmployee(salary: number, departmentNo: number, lastModifyDate: Date, employeeName: string){
+export async function updateEmployee(salary: number, departmentNo: number, lastModifyDate: Date, employeeName: string) {
     const client = await dbClient()
 
-    try{
+    try {
         await client.query('BEGIN')
 
         //const employeeNo = await client.query('SELECT "employeeNo" FROM public.employee WHERE "employeeNo" = $1', [employeeNo])
@@ -45,17 +49,17 @@ export async function updateEmployee(salary: number, departmentNo: number, lastM
         )
 
         await client.query('COMMIT')
-    }catch(e){
+    } catch (e) {
         await client.query('ROLLBACK')
-    }finally{
+    } finally {
         client.release()
     }
 }
 
-export async function deleteEmployee(employeeName: string){
+export async function deleteEmployee(employeeName: string) {
     const client = await dbClient()
 
-    try{
+    try {
         await client.query('BEGIN')
 
         await client.query(
@@ -63,10 +67,10 @@ export async function deleteEmployee(employeeName: string){
         )
 
         await client.query('COMMIT')
-    }catch(e){
+    } catch (e) {
         await client.query('ROLLBACK')
         console.log(e)
-    }finally{
+    } finally {
         client.release()
     }
 }
