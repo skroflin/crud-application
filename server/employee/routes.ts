@@ -13,10 +13,9 @@ router.get("/", async function(req, res, next) {
 })
 
 router.post("/", async function (req, res, next) {
-    
+
     try{
-        const{ employeeName, salary, departmentNo, lastModifyDate } = req.body
-        //console.log(employeeName, salary, departmentName, lastModifyDate)
+        const{ employeeName, salary, departmentNo, lastModifyDate } = req.body.data
         res.json(await insertEmployees(employeeName, salary, departmentNo, lastModifyDate))
     }catch(e){
         next(e)
@@ -26,8 +25,7 @@ router.post("/", async function (req, res, next) {
 router.put("/", async function (req, res, next) {
 
     try{
-        const{ salary, departmentNo, lastModifyDate, employeeName } = req.body
-        //console.log(salary, departmentNo, lastModifyDate)
+        const{ salary, departmentNo, lastModifyDate, employeeName } = req.body.data
         await updateEmployee(salary, departmentNo, lastModifyDate, employeeName)
         res.sendStatus(200)
     }catch(e){
@@ -36,10 +34,10 @@ router.put("/", async function (req, res, next) {
 })
 
 router.delete("/", async function (req, res, next){
-    
+
     try{
+        console.log(req.body)
         const{ employeeName } = req.body
-        console.log(employeeName)
         await deleteEmployee(employeeName)
         res.sendStatus(200)
     }catch(e){

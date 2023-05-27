@@ -5,10 +5,9 @@ let POOL_INSTANCE: pg.Pool | undefined
 async function getPool(){
     if(POOL_INSTANCE) return POOL_INSTANCE
     POOL_INSTANCE = new pg.Pool({
-        user: 'postgres',
+        user: 'mkroflin',
         host: 'localhost',
-        database: 'postgres',
-        password: 'kr0fn4031',
+        database: 'sven',
         port: 5432,
     })
 

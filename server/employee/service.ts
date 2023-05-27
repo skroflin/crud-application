@@ -7,7 +7,7 @@ export async function getAllEmployees() {
         SELECT e."employeeName", e."salary", d."departmentName", d."departmentLocation", e."lastModifyDate"
         FROM public.department d
         INNER JOIN public.employee e ON d."departmentNo" = e."departmentNo";`)
-        
+
     return employees.rows
 }
 
@@ -19,7 +19,6 @@ export async function insertEmployees(employeeName: string, salary: number, depa
         await client.query('BEGIN')
 
         //const departmentNo = await client.query('SELECT "departmentNo" FROM public.department WHERE "departmentName" = $1 WHERE "departmentLocation"', [departmentName, departmentLocation])
-
         const insertedEmployee = await client.query(
             'INSERT INTO public.employee ("employeeName", "salary", "departmentNo", "lastModifyDate") VALUES ($1, $2, $3, $4)',
             [employeeName, salary, departmentNo, lastModifyDate]
@@ -73,8 +72,4 @@ export async function deleteEmployee(employeeName: string) {
     } finally {
         client.release()
     }
-}
-
-function query(_arg0: string, _arg1: any[]) {
-    throw new Error('Function not implemented.')
 }
