@@ -19,8 +19,12 @@ router.post("/", async function (req, res, next) {
     
     try{
         const{ departmentName, departmentLocation } = req.body
-        await insertDepartments(departmentName, departmentLocation)
-        res.sendStatus(400)
+        const insertDepartmentsResult = await insertDepartments(departmentName, departmentLocation)
+        if (await insertDepartmentsResult === true){
+            res.sendStatus(200)
+        }else{
+            res.sendStatus(400)
+        }
     }catch(e){
         next(e)
     }
@@ -30,8 +34,12 @@ router.put("/", async function (req, res, next) {
 
     try{
         const{ departmentLocation, departmentName, departmentNo } = req.body
-        await updateDepartments(departmentLocation, departmentName, departmentNo)
-        res.sendStatus(400)
+        const updateDeparmentsResult = await updateDepartments(departmentLocation, departmentName, departmentNo)
+        if (updateDeparmentsResult === true){
+            res.sendStatus(200)
+        }else{
+            res.sendStatus(400)
+        }
     }catch(e){
         next(e)
     }
@@ -41,8 +49,12 @@ router.delete("/", async function (req, res, next) {
 
     try{
         const { departmentName, departmentLocation } = req.body
-        await deleteDepartment(departmentName, departmentLocation)
-        res.sendStatus(400)
+        const deleteDeparmentResult = await deleteDepartment(departmentName, departmentLocation)
+        if (deleteDeparmentResult === true){
+            res.sendStatus(200)
+        }else{
+            res.sendStatus(400)
+        }
     }catch(e){
         next(e)
     }
