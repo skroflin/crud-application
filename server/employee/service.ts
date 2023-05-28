@@ -27,6 +27,7 @@ export async function insertEmployees(employeeName: string, salary: number, depa
         //if (departmentNo.row.length == 0) throw new Error(`Department with name ${departmentName} does not exist)`)
 
         await client.query('COMMIT')
+        return(true)
     } catch (e) {
         await client.query('ROLLBACK')
     } finally {
@@ -48,6 +49,7 @@ export async function updateEmployee(salary: number, departmentNo: number, lastM
         )
 
         await client.query('COMMIT')
+        return(true)
     } catch (e) {
         await client.query('ROLLBACK')
     } finally {
@@ -66,6 +68,7 @@ export async function deleteEmployee(employeeName: string) {
         )
 
         await client.query('COMMIT')
+        return(true)
     } catch (e) {
         await client.query('ROLLBACK')
         console.log(e)

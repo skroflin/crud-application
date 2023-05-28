@@ -24,6 +24,7 @@ export async function insertDepartments(departmentName: string, departmentLocati
         )
 
         await client.query('COMMIT')
+        return(true)
     }catch(e){
         await client.query('ROLLBACK')
         throw e
@@ -43,6 +44,7 @@ export async function updateDepartments(departmentLocation: string, departmentNa
         )
 
         await client.query('COMMIT')
+        return(true)
     }catch(e){
         await client.query('ROLLBACK')
         console.log(e)
@@ -62,6 +64,7 @@ export async function deleteDepartment(departmentName: string, departmentLocatio
         )
 
         await client.query('COMMIT')
+        return(true)
     }catch(e){
         await client.query('ROLLBACK')
         console.log(e)
