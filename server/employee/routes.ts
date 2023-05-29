@@ -16,7 +16,7 @@ router.post("/", async function (req, res, next) {
 
     try{
         console.log(req.body)
-        const{ employeeName, salary, departmentNo, lastModifyDate } = req.body.data
+        const{ employeeName, salary, departmentNo, lastModifyDate } = req.body
         const insertEmployeeResult = await insertEmployees(employeeName, salary, departmentNo, lastModifyDate)
         if (await insertEmployeeResult === true){
             res.sendStatus(200) 
@@ -47,7 +47,7 @@ router.delete("/", async function (req, res, next){
 
     try{
         console.log(req.body)
-        const{ employeeName } = req.body.data
+        const{ employeeName } = req.body
         const deleteEmployeeResult = await deleteEmployee(employeeName)
         if (await deleteEmployeeResult === true){
             res.sendStatus(200)
