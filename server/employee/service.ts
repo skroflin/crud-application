@@ -26,16 +26,15 @@ export async function insertEmployees(employeeName: string, salary: number, depa
         const department = await client.query(`
             SELECT "department_no" as "departmentNo"
             FROM department
-            WHERE "department_name" = $1 AND "department_location" = $2`
-        , [departmentName, departmentLocation])
+            WHERE "department_name" = $1 AND "department_location" = $2
+        `, [departmentName, departmentLocation])
 
         if (department.rowCount === 0) throw Error(`Department ${departmentName}, ${departmentLocation} does not exist`)
 
         await client.query(`
             INSERT INTO employee ("employee_name", "salary", "department_no")
             VALUES ($1, $2, $3)
-            `, [employeeName, salary, department.rows[0].departmentNo]
-        )
+        `, [employeeName, salary, department.rows[0].departmentNo])
     })
 }
 
@@ -50,8 +49,8 @@ export async function updateEmployee(employeeName: string, salary: number, depar
         const department = await client.query(`
             SELECT "department_no" as "departmentNo"
             FROM department
-            WHERE "department_name" = $1 AND "department_location" = $2`
-        , [departmentName, departmentLocation])
+            WHERE "department_name" = $1 AND "department_location" = $2
+        `, [departmentName, departmentLocation])
 
         if (department.rowCount === 0) throw Error(`Department ${departmentName}, ${departmentLocation} does not exist`)
 
