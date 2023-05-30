@@ -1,14 +1,13 @@
-import pg from "pg";
+import { Pool, PoolClient, QueryResultRow } from "pg";
 
-let POOL_INSTANCE: pg.Pool | undefined
+let POOL_INSTANCE: Pool | undefined
 
-async function getPool(){
+async function getPool(): Promise<Pool> {
     if(POOL_INSTANCE) return POOL_INSTANCE
-    POOL_INSTANCE = new pg.Pool({
-        user: 'postgres',
+    POOL_INSTANCE = new Pool({
+        user: 'mkroflin',
         host: 'localhost',
-        password: 'kr0fn4031',
-        database: 'postgres',
+        database: 'sven',
         port: 5432,
     })
 
@@ -17,4 +16,24 @@ async function getPool(){
 
 export async function dbClient(){
     return (await getPool()).connect()
+}
+
+export async function query<T extends QueryResultRow = any>(query: string, args?: any[]): Promise<{ rows: T[], rowCount: number }> {
+    return (await getPool()).query<T>(query, args)
+}
+
+export async function transactionQuery<T>(queries: (client: PoolClient) => Promise<T>) {
+    const client = await dbClient()
+
+    try {
+        await client.query('BEGIN')
+        const result = await queries(client)
+        await client.query('COMMIT')
+        return result
+    } catch (e) {
+        await client.query('ROLLBACK')
+        throw e
+    } finally {
+        client.release()
+    }
 }

@@ -1,78 +1,58 @@
-import { dbClient } from '../database'
+import { dbClient, query, transactionQuery } from '../database'
 
 export async function getAllEmployees() {
 
-    const client = await dbClient()
-    const employees = await client.query(`
-        SELECT e."employeeName", e."salary", d."departmentName", d."departmentLocation", e."lastModifyDate"
-        FROM public.department d
-        INNER JOIN public.employee e ON d."departmentNo" = e."departmentNo";`)
+    const employees = await query(`
+        SELECT
+            e."employee_name" as "employeeName",
+            e."salary",
+            d."department_name" as "departmentName",
+            d."department_location" as "departmentLocation",
+            e."last_modify_date" as "lastModifyDate"
+        FROM department d
+        INNER JOIN employee e ON d."department_no" = e."department_no"`)
 
     return employees.rows
 }
 
-export async function insertEmployees(employeeName: string, salary: number, departmentNo: number, lastModifyDate: Date) {
+export async function insertEmployees(employeeName: string, salary: number, departmentNo: number) {
 
-    const client = await dbClient()
+    await transactionQuery(async (client) => {
 
-    try {
-        await client.query('BEGIN')
+        const employee = await client.query(`SELECT * FROM employee WHERE "employee_name" = $1`, [employeeName])
 
-        //const departmentNo = await client.query('SELECT "departmentNo" FROM public.department WHERE "departmentName" = $1 WHERE "departmentLocation"', [departmentName, departmentLocation])
-        const insertedEmployee = await client.query(
-            'INSERT INTO public.employee ("employeeName", "salary", "departmentNo", "lastModifyDate") VALUES ($1, $2, $3, $4)',
-            [employeeName, salary, departmentNo, lastModifyDate]
+        if (employee.rowCount !== 0) throw Error(`Employee ${employeeName} already exists`)
+
+        await client.query(`
+            INSERT INTO employee ("employee_name", "salary", "department_no")
+            VALUES ($1, $2, $3)
+            `, [employeeName, salary, departmentNo]
         )
-
-        //if (departmentNo.row.length == 0) throw new Error(`Department with name ${departmentName} does not exist)`)
-
-        await client.query('COMMIT')
-        return(true)
-    } catch (e) {
-        await client.query('ROLLBACK')
-    } finally {
-        client.release()
-    }
-
+    })
 }
 
 export async function updateEmployee(salary: number, departmentNo: number, lastModifyDate: Date, employeeName: string) {
-    const client = await dbClient()
 
-    try {
-        await client.query('BEGIN')
+    await transactionQuery(async (client) => {
 
-        //const employeeNo = await client.query('SELECT "employeeNo" FROM public.employee WHERE "employeeNo" = $1', [employeeNo])
+        const employee = await client.query(`SELECT * FROM employee WHERE "employee_name" = $1`, [employeeName])
 
-        await client.query(
-            'UPDATE public.employee SET "salary" = $1, "departmentNo" = $2, "lastModifyDate" = $3 WHERE "employeeName" = $4 RETURNING *', [salary, departmentNo, lastModifyDate, employeeName]
-        )
+        if (employee.rowCount === 0 ) throw Error(`Employee ${employeeName} does not exists`)
 
-        await client.query('COMMIT')
-        return(true)
-    } catch (e) {
-        await client.query('ROLLBACK')
-    } finally {
-        client.release()
-    }
+        await client.query(`
+            UPDATE employee SET "salary" = $1, "department_no" = $2, "last_modify_date" = $3 WHERE "employee_name" = $4
+        `, [salary, departmentNo, lastModifyDate, employeeName])
+    })
 }
 
 export async function deleteEmployee(employeeName: string) {
-    const client = await dbClient()
 
-    try {
-        await client.query('BEGIN')
+    await transactionQuery(async (client) => {
 
-        await client.query(
-            'DELETE FROM public.employee WHERE "employeeName" = $1 RETURNING *', [employeeName]
-        )
+        const employee = await client.query(`SELECT * FROM employee WHERE "employee_name" = $1`, [employeeName])
 
-        await client.query('COMMIT')
-        return(true)
-    } catch (e) {
-        await client.query('ROLLBACK')
-        console.log(e)
-    } finally {
-        client.release()
-    }
+        if (employee.rowCount === 0) throw Error(`Employee ${employeeName} does not exists`)
+
+        await client.query(`DELETE FROM employee WHERE "employeeName" = $1`, [employeeName])
+    })
 }

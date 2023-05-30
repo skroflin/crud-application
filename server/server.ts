@@ -1,8 +1,11 @@
 import express from 'express';
 import http from 'http';
+import { timeMiddleware } from './logs';
 
 const app = express()
 const server = http.createServer(app)
+
+app.use(timeMiddleware) //logging
 
 app.get('/health', (req, res) => {
     res.sendStatus(200)

@@ -1,78 +1,47 @@
-import { dbClient } from '../database'
+import { dbClient, query, transactionQuery } from '../database'
 
 export async function getAllDepartments() {
 
-    const client = await dbClient()
-    const departments = await client.query('SELECT * FROM public.department')
+    const departments = await query(`
+        SELECT
+            "department_no" as "departmentNo",
+            "department_name" as "departmentName",
+            "department_location" as "departmentLocation"
+        FROM department`)
+
     return departments.rows
 }
 
 export async function insertDepartments(departmentName: string, departmentLocation: string) {
 
-    const client = await dbClient()
-    try{
-        await client.query('BEGIN')
+    await transactionQuery(async (client) => {
+        const departments = await client.query(`
+            SELECT * FROM department WHERE "department_name" = $1 AND "department_location" = $2
+        `, [departmentName, departmentLocation])
 
-        const departments = await client.query(
-            'SELECT * FROM public.department WHERE "departmentName" = $1 AND "departmentLocation" = $2', [departmentName, departmentLocation]
-        )
-        if(departments.rows.length !== 0) throw new Error(`Department with name ${departmentName} and location ${departmentLocation} exists`)
+        if (departments.rows.length !== 0) throw new Error(`Department with name ${departmentName} and location ${departmentLocation} exists`)
 
-        const ad = await client.query(
-            'INSERT INTO public.department ("departmentName", "departmentLocation") VALUES ($1, $2)',
-            [departmentName, departmentLocation]
-        )
-
-        await client.query('COMMIT')
-        return(true)
-    }catch(e){
-        await client.query('ROLLBACK')
-        throw e
-    }finally{
-        client.release()
-    }
+        await client.query(`
+            INSERT INTO department ("department_name", "department_location") VALUES ($1, $2)
+        `, [departmentName, departmentLocation])
+    })
 }
 
-export async function updateDepartments(departmentLocation: string, departmentName: string, departmentNo) {
+export async function updateDepartments(departmentLocation: string, departmentName: string, departmentNo: number) {
 
-    const client = await dbClient()
-    try{
-        await client.query('BEGIN')
-
-        await client.query(
-            'UPDATE public.department SET "departmentLocation" = $1, "departmentName" = $2 WHERE "departmentNo" = $3 RETURNING *', [departmentLocation, departmentName, departmentNo]
-        )
-
-        await client.query('COMMIT')
-        return(true)
-    }catch(e){
-        await client.query('ROLLBACK')
-        console.log(e)
-    }finally{
-        client.release()
-    }
+    await transactionQuery(async (client) => {
+        await client.query(`
+            UPDATE department
+            SET "department_location" = $1, "department_name" = $2 WHERE "department_no" = $3
+        `, [departmentLocation, departmentName, departmentNo])
+    })
 }
 
 export async function deleteDepartment(departmentName: string, departmentLocation: string){
 
-    const client = await dbClient()
-    try{
-        await client.query('BEGIN')
-
-        await client.query(
-            'DELETE FROM public.department WHERE "departmentName" = $1 AND "departmentLocation" = $2 RETURNING *', [departmentName, departmentLocation]
-        )
-
-        await client.query('COMMIT')
-        return(true)
-    }catch(e){
-        await client.query('ROLLBACK')
-        console.log(e)
-    }finally{
-        client.release()
-    }
-}
-
-function query(arg0: string, arg1: any[]) {
-    throw new Error('Function not implemented.')
+    await transactionQuery(async (client) => {
+        await client.query(`
+            DELETE FROM department WHERE "departmentName" = $1 AND "departmentLocation" = $2`
+        , [departmentName, departmentLocation])
+    })
 }
