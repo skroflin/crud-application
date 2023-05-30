@@ -15,9 +15,8 @@ router.get("/", async function(_req: Request, res: Response, next: NextFunction)
 router.post("/", async function (req: Request, res: Response, next: NextFunction) {
 
     try {
-        console.log(req.body)
-        const { employeeName, salary, departmentNo } = req.body
-        await insertEmployees(employeeName, salary, departmentNo)
+        const { employeeName, salary, departmentName, departmentLocation } = req.body
+        await insertEmployees(employeeName, salary, departmentName, departmentLocation)
         res.sendStatus(200)
     } catch(e) {
         next(e)
@@ -27,9 +26,8 @@ router.post("/", async function (req: Request, res: Response, next: NextFunction
 router.put("/", async function (req: Request, res: Response, next: NextFunction) {
 
     try {
-        console.log(req.body)
-        const { salary, departmentNo, lastModifyDate, employeeName } = req.body
-        await updateEmployee(salary, departmentNo, lastModifyDate, employeeName)
+        const { salary, departmentName, departmentLocation, lastModifyDate, employeeName } = req.body
+        await updateEmployee(employeeName, salary, departmentName, departmentLocation, lastModifyDate)
         res.sendStatus(200)
     } catch(e) {
         next(e)

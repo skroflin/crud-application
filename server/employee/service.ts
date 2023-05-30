@@ -15,7 +15,7 @@ export async function getAllEmployees() {
     return employees.rows
 }
 
-export async function insertEmployees(employeeName: string, salary: number, departmentNo: number) {
+export async function insertEmployees(employeeName: string, salary: number, departmentName: string, departmentLocation: string) {
 
     await transactionQuery(async (client) => {
 
@@ -23,15 +23,23 @@ export async function insertEmployees(employeeName: string, salary: number, depa
 
         if (employee.rowCount !== 0) throw Error(`Employee ${employeeName} already exists`)
 
+        const department = await client.query(`
+            SELECT "department_no" as "departmentNo"
+            FROM department
+            WHERE "department_name" = $1 AND "department_location" = $2`
+        , [departmentName, departmentLocation])
+
+        if (department.rowCount === 0) throw Error(`Department ${departmentName}, ${departmentLocation} does not exist`)
+
         await client.query(`
             INSERT INTO employee ("employee_name", "salary", "department_no")
             VALUES ($1, $2, $3)
-            `, [employeeName, salary, departmentNo]
+            `, [employeeName, salary, department.rows[0].departmentNo]
         )
     })
 }
 
-export async function updateEmployee(salary: number, departmentNo: number, lastModifyDate: Date, employeeName: string) {
+export async function updateEmployee(employeeName: string, salary: number, departmentName: string, departmentLocation: string, lastModifyDate: Date) {
 
     await transactionQuery(async (client) => {
 
@@ -39,9 +47,17 @@ export async function updateEmployee(salary: number, departmentNo: number, lastM
 
         if (employee.rowCount === 0 ) throw Error(`Employee ${employeeName} does not exists`)
 
+        const department = await client.query(`
+            SELECT "department_no" as "departmentNo"
+            FROM department
+            WHERE "department_name" = $1 AND "department_location" = $2`
+        , [departmentName, departmentLocation])
+
+        if (department.rowCount === 0) throw Error(`Department ${departmentName}, ${departmentLocation} does not exist`)
+
         await client.query(`
             UPDATE employee SET "salary" = $1, "department_no" = $2, "last_modify_date" = $3 WHERE "employee_name" = $4
-        `, [salary, departmentNo, lastModifyDate, employeeName])
+        `, [salary, department.rows[0].departmentNo, lastModifyDate, employeeName])
     })
 }
 

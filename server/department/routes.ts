@@ -18,7 +18,6 @@ router.get("/", async function(_req: Request, res: Response, next: NextFunction)
 router.post("/", async function (req: Request, res: Response, next: NextFunction) {
 
     try {
-        console.log(req.body)
         const { departmentName, departmentLocation } = req.body
         await insertDepartments(departmentName, departmentLocation)
         res.sendStatus(200)
@@ -32,7 +31,6 @@ router.put("/", async function (req: Request, res: Response, next: NextFunction)
     try {
         const { departmentLocation, departmentName, departmentNo } = req.body
         await updateDepartments(departmentLocation, departmentName, departmentNo)
-        console.log(req.body)
         res.sendStatus(200)
     } catch(e) {
         next(e)
