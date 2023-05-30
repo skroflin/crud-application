@@ -30,6 +30,13 @@ export async function insertDepartments(departmentName: string, departmentLocati
 export async function updateDepartments(departmentLocation: string, departmentName: string, departmentNo: number) {
 
     await transactionQuery(async (client) => {
+
+        const departments = await client.query(`
+            SELECT * FROM department WHERE "department_name" = $1 AND "department_location" = $2
+            `, [departmentName, departmentLocation])
+
+        if (departments.rows.length !== 0) throw new Error (`Department with name ${departmentName} and location ${departmentLocation} already exists`)
+
         await client.query(`
             UPDATE department
             SET "department_location" = $1, "department_name" = $2 WHERE "department_no" = $3
